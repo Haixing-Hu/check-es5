@@ -27,7 +27,13 @@ function checkScript(packageName, scriptPath, options, indent) {
     console.log(`${indentSpace}${INVALID_SYMBOL} ${packageName} is not ES${options.esVersion} compatible.`);
     return false;
   } else {
-    const scriptCode = fs.readFileSync(scriptPath, 'utf8');
+    let scriptCode;
+    try {
+      scriptCode = fs.readFileSync(scriptPath, 'utf8');
+    } catch (error) {
+      console.log(`${indentSpace}${INVALID_SYMBOL} Failed to open the script file of ${packageName}.`);
+      return false;
+    }
     try {
       acorn.parse(scriptCode, { ecmaVersion: options.esVersion });
       console.log(`${indentSpace}${VALID_SYMBOL} ${packageName} is ES${options.esVersion} compatible.`);
@@ -68,9 +74,8 @@ function checkEsCompatible(packageName, packagePath, options, indent) {
   const mainScriptPath = resolve(packagePath, package.main);
   options.compatible = new Set();
   options.uncompatible = new Set();
-  if (!checkScript(packageName, mainScriptPath, options , indent)) {
-    checkDependencies(packagePath, options, indent + 1);
-  }
+  checkScript(packageName, mainScriptPath, options , indent);
+  checkDependencies(packagePath, options, indent + 1);
   console.log('All compatible packages are: ');
   options.compatible.forEach((pkg) => {
     console.log(`  ${VALID_SYMBOL} ${pkg}`);
