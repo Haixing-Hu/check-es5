@@ -15,6 +15,7 @@ const fs = require('fs');
 const acorn = require('acorn');
 const yargs = require('yargs/yargs');
 const { hideBin } = require('yargs/helpers');
+const QUESTION_SYMBOL = '❓';
 const VALID_SYMBOL = '✅';
 const INVALID_SYMBOL = '❌';
 
@@ -31,7 +32,8 @@ function checkScript(packageName, scriptPath, options, indent) {
     try {
       scriptCode = fs.readFileSync(scriptPath, 'utf8');
     } catch (error) {
-      console.log(`${indentSpace}${INVALID_SYMBOL} Failed to open the script file of ${packageName}.`);
+      console.log(`${indentSpace}${QUESTION_SYMBOL} Failed to open the script file of ${packageName}. `
+        + 'Maybe it is not a script library or it has not been compiled.');
       return false;
     }
     try {
@@ -58,7 +60,12 @@ function checkDependencies(packagePath, options, indent) {
     .sort();
   // console.log('Checking the following list of dependencies: ', dependencies);
   dependencies.forEach((dep) => {
-    const scriptPath = require.resolve(dep, { paths: [ options.requireResolvePath ] });
+    let scriptPath = null;
+    try {
+      scriptPath = require.resolve(dep, { paths: [ options.requireResolvePath ] });
+    } catch (error) {
+      scriptPath = null;
+    }
     if (!checkScript(dep, scriptPath, options, indent)) {
       const depDir = resolve(options.requireResolvePath, `node_modules/${dep}`);
       checkDependencies(depDir, options, indent + 1);
