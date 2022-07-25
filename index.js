@@ -32,7 +32,7 @@ function checkScript(packageName, scriptPath, options, indent) {
     try {
       scriptCode = fs.readFileSync(scriptPath, 'utf8');
     } catch (error) {
-      console.log(`${indentSpace}${QUESTION_SYMBOL} Failed to open the script file of ${packageName}. `
+      console.log(`${indentSpace}${QUESTION_SYMBOL} ${packageName} has no main script file. `
         + 'Maybe it is not a script library or it has not been compiled.');
       return false;
     }
