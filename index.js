@@ -17,8 +17,9 @@ const { hideBin } = require('yargs/helpers');
 const QUESTION_SYMBOL = '❓';
 const VALID_SYMBOL = '✅';
 const INVALID_SYMBOL = '❌';
-const INDENT_SPACE = '    ';
-const IGNORED_SUFFIX = ['.css', '.less', '.scss', '.style'];
+const INDENT_SPACE = '  ';
+const IGNORE_FILE_EXTENSIONS = ['.css', '.less', '.scss', '.style'];
+const JAVASCRIPT_FILE_EXTENSIONS = ['.js', '.cjs'];
 
 function outputCompatible(packageName, options, indent) {
   const indentSpace = INDENT_SPACE.repeat(indent);
@@ -44,17 +45,35 @@ function outputNonJs(packageName, indent) {
   console.log(`${indentSpace}${VALID_SYMBOL} ${packageName} is not a JavaScript library, ignore it.`);
 }
 
-function checkScript(packageName, scriptPath, options, indent) {
-  if (scriptPath) {
-    for (const suffix of IGNORED_SUFFIX) {
-      if (scriptPath.endsWith(suffix)) {
-        if (options.showDependencyTree) {
-          outputNonJs(packageName, indent);
-        }
-        options.nonJs.add(packageName);
+function shouldIgnore(path) {
+  if (path) {
+    for (const ext of IGNORE_FILE_EXTENSIONS) {
+      if (path.endsWith(ext)) {
         return true;
       }
     }
+  }
+  return false;
+}
+
+function isJavascriptFile(path) {
+  if (path) {
+    for (const ext of JAVASCRIPT_FILE_EXTENSIONS) {
+      if (path.endsWith(ext)) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+function checkScript(packageName, scriptPath, options, indent) {
+  if (shouldIgnore(scriptPath)) {
+    if (options.showDependencyTree) {
+      outputNonJs(packageName, indent);
+    }
+    options.nonJs.add(packageName);
+    return true;
   }
   let scriptCode;
   try {
@@ -204,7 +223,13 @@ const args = yargs(hideBin(process.argv))
   .option('target-file', {
     alias: 'f',
     description: 'Check the specified target file.',
-    type: Boolean,
+    type: String,
+    default: '',
+  })
+  .option('target-dir', {
+    alias: 'd',
+    description: 'Check all JavaScript files in the target directory.',
+    type: String,
     default: '',
   })
   .help()
@@ -218,6 +243,7 @@ const packagePath = (packageName === '.' ? '.' : resolve(requireResolvePath, `no
 const showDependencyTree = (args.showDependencyTree === 'true');
 const showError = (args.showError === 'true');
 const targetFile = args.targetFile;
+const targetDir = args.targetDir;
 const options = {
   requireResolvePath,
   esVersion,
@@ -230,11 +256,26 @@ const options = {
   uncompatibleErrors: new Map(),
 };
 
-// console.log(options);
+// console.log(args);
 
 if (targetFile) {
   options.showDependencyTree = true;
   checkScript(targetFile, targetFile, options, 0);
+} else if (targetDir) {
+  console.log(`Checking all JavaScript files in ${targetDir} ...`);
+  options.showDependencyTree = true;
+  fs.readdir(targetDir, (error, files) => {
+    if (error) {
+      console.error(`Cannot open the directory ${targetDir}.`);
+    } else {
+      files.forEach((file) => {
+        if (isJavascriptFile(file)) {
+          const path = resolve(targetDir, file);
+          checkScript(path, path, options, 0);
+        }
+      });
+    }
+  });
 } else {
   checkEsCompatible(packageName, packagePath, options, 0);
 }
