@@ -71,7 +71,7 @@ function checkEsCompatible(packageName, packagePath, options, indent) {
   if (packageName === '.') {
     packageName = package.name;
   }
-  const mainScriptPath = resolve(packagePath, package.main);
+  const mainScriptPath = (package.main ? resolve(packagePath, package.main) : null);
   options.compatible = new Set();
   options.uncompatible = new Set();
   checkScript(packageName, mainScriptPath, options , indent);
