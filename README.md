@@ -70,7 +70,7 @@ following command to your `package.json`:
 ```
 "scripts": {
   ...
-  "es5": "for f in ./dist/spa/js/*.js; do ./node_modules/.bin/check-es-version -e 5 -f $f; done",
+  "es5": "./node_modules/.bin/check-es-version -e 5 -d ./dist/spa/js/",
   "es5:dep": "./node_modules/.bin/check-es-version -e 5 -p .",
   ...
 }
