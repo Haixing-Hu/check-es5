@@ -41,7 +41,6 @@ function outputCannotOpen(packageName, indent) {
 }
 
 function checkScript(packageName, scriptPath, options, indent) {
-  const indentSpace = '    '.repeat(indent);
   if (options.compatible.has(packageName)) {
     if (options.showDependencyTree) {
       outputCompatible(packageName, options, indent);
@@ -85,10 +84,19 @@ function checkScript(packageName, scriptPath, options, indent) {
   }
 }
 
-function checkDependencies(packagePath, options, indent) {
-  const package = require(resolve(packagePath, 'package.json'));
-  const dependencies = Object.keys(package.dependencies || {})
-    .concat(Object.keys(package.peerDependencies || {}))
+function checkDependencies(packageName, packagePath, options, indent) {
+  let packageInfo;
+  try {
+    packageInfo = require(resolve(packagePath, 'package.json'));
+  } catch (error) {
+    if (options.showDependencyTree) {
+      outputCannotOpen(packageName, indent);
+    }
+    options.cannotopen.add(packageName);
+    return false;
+  }
+  const dependencies = Object.keys(packageInfo.dependencies || {})
+    .concat(Object.keys(packageInfo.peerDependencies || {}))
     .sort();
   // console.log('Checking the following list of dependencies: ', dependencies);
   dependencies.forEach((dep) => {
@@ -100,7 +108,7 @@ function checkDependencies(packagePath, options, indent) {
     }
     if (!checkScript(dep, scriptPath, options, indent)) {
       const depDir = resolve(options.requireResolvePath, `node_modules/${dep}`);
-      checkDependencies(depDir, options, indent + 1);
+      checkDependencies(dep, depDir, options, indent + 1);
     }
   });
 }
