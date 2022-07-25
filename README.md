@@ -28,7 +28,7 @@ the package in the current directory.
 - `requireResolvePath`: The path where to resolve the dependent packages. Default value
 is ".", indicating the program will try to resolve the path of the dependent packages
 in the "./node_modules" directory.
-- `showDependencyTree`: Whether to display the dependency tree. Default value is `true`.
+- `showDependencyTree`: Whether to display the dependency tree. Default value is `false`.
 If the project has a very deep dependency tree, display the dependency tree may
 cause an unreadable output.
 - `showError`: Whether to display the detailed errors. Default value is `false`.
