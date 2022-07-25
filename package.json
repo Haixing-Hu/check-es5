@@ -1,0 +1,30 @@
+{
+  "name": "check-es-version",
+  "version": "1.0.0",
+  "description": "A tool used to check the ECMAScript compatibility of JavaScript packages.",
+  "main": "index.js",
+  "bin": {
+    "check-es-version": "index.js"
+  },
+  "scripts": {
+    "deploy": "npm publish --registry=https://registry.npmjs.org/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Haixing-Hu/check-es-version.git"
+  },
+  "keywords": [
+    "ECMASCript",
+    "compatibility"
+  ],
+  "author": "Haixing Hu",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Haixing-Hu/check-es-version/issues"
+  },
+  "homepage": "https://github.com/Haixing-Hu/check-es-version#readme",
+  "dependencies": {
+    "acorn": "^8.8.0",
+    "yargs": "^17.5.1"
+  }
+}
