@@ -79,8 +79,6 @@ function checkEsCompatible(packageName, packagePath, options, indent) {
     packageName = package.name;
   }
   const mainScriptPath = (package.main ? resolve(packagePath, package.main) : null);
-  options.compatible = new Set();
-  options.uncompatible = new Set();
   checkScript(packageName, mainScriptPath, options , indent);
   checkDependencies(packagePath, options, indent + 1);
   console.log('All compatible packages are: ');
@@ -123,6 +121,12 @@ const args = yargs(hideBin(process.argv))
     type: Boolean,
     default: false,
   })
+  .option('target-file', {
+    alias: 'f',
+    description: 'Check the specified target file.',
+    type: Boolean,
+    default: '',
+  })
   .help()
   .alias('help', 'h')
   .argv;
@@ -132,9 +136,16 @@ const requireResolvePath = args.requireResolvePath;
 const packageName = args.packageName;
 const packagePath = (packageName === '.' ? '.' : resolve(requireResolvePath, `node_modules/${packageName}`));
 const showError = args.showError;
-
-checkEsCompatible(packageName, packagePath, {
+const targetFile = args.targetFile;
+const options = {
   requireResolvePath,
   esVersion,
   showError,
-}, 0);
+  compatible: new Set(),
+  uncompatible: new Set(),
+};
+if (targetFile) {
+  checkScript(targetFile, targetFile, options, 0);
+} else {
+  checkEsCompatible(packageName, packagePath, options, 0);
+}
