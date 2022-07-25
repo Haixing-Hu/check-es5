@@ -36,8 +36,7 @@ function outputUncompatible(packageName, options, indent, error) {
 
 function outputCannotOpen(packageName, indent) {
   const indentSpace = INDENT_SPACE.repeat(indent);
-  console.log(`${indentSpace}${QUESTION_SYMBOL} ${packageName} has no main script file. `
-    + 'Maybe it is not a script library or it has not been compiled.');
+  console.log(`${indentSpace}${QUESTION_SYMBOL} ${packageName} has no main script file. `);
 }
 
 function outputNonJs(packageName, indent) {
@@ -162,9 +161,12 @@ function checkEsCompatible(packageName, packagePath, options, indent) {
       outputUncompatible(pkg, options, 1, error);
     });
   }
-  options.canNotOpen.forEach((pkg) => {
-    outputCannotOpen(pkg, 1);
-  });
+  if (options.canNotOpen.size > 0) {
+    console.log('The following packages have no main script or cannot be read:')
+    options.canNotOpen.forEach((pkg) => {
+      outputCannotOpen(pkg, 1);
+    });
+  }
   return (options.uncompatible.size === 0);
 }
 
