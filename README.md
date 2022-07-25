@@ -12,7 +12,11 @@ yarn add --dev check-es-version
 ## Usage
 
 ```
-check-es-version --es-version=<esVersion> --package-name=<packageName> --require-resolve-path=<requireResolvePath> --show-error=<showError>
+check-es-version --es-version=<esVersion> \
+  --package-name=<packageName> \
+  --require-resolve-path=<requireResolvePath> \
+  --show-error=<showError> \
+  [--target-file=<targetFile>]
 ```
 
 where
@@ -26,6 +30,8 @@ in the "./node_modules" directory.
 - `showError`: Whether to display the detailed errors. Default value is `false`.
 It it is set to `true`, the detailed parsing errors of each uncompatible packages
 will be displayed.
+- `targetFile`: If this argument is specified, the program will check the
+compatibility of the specified target JavaScript file.
 - `--help` or `-h`: Show the command line help messages.
 
 ## Examples
