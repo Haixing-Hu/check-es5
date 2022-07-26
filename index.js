@@ -113,9 +113,11 @@ function checkDependencies(packageName, packagePath, options, indent) {
     options.canNotOpen.add(packageName);
     return false;
   }
-  const dependencies = Object.keys(packageInfo.dependencies || {})
-    .concat(Object.keys(packageInfo.peerDependencies || {}))
-    .sort();
+  let dependencies = Object.keys(packageInfo.dependencies || {});
+  if (options.checkPeerDenpendency) {
+    dependencies = dependencies.concat(Object.keys(packageInfo.peerDependencies || {}));
+  }
+  dependencies = dependencies.sort();
   // console.log('Checking the following list of dependencies: ', dependencies);
   dependencies.forEach((dep) => {
     if (options.compatible.has(dep)) {
@@ -220,6 +222,12 @@ const args = yargs(hideBin(process.argv))
     type: String,
     default: 'false',
   })
+  .option('check-peer-dependency', {
+    alias: 'c',
+    description: 'Whether to check the peer dependency.',
+    type: String,
+    default: 'false',
+  })
   .option('target-file', {
     alias: 'f',
     description: 'Check the specified target file.',
@@ -242,6 +250,7 @@ const packageName = args.packageName;
 const packagePath = (packageName === '.' ? '.' : resolve(requireResolvePath, `node_modules/${packageName}`));
 const showDependencyTree = (args.showDependencyTree === 'true');
 const showError = (args.showError === 'true');
+const checkPeerDenpendency = (args.checkPeerDenpendency === 'true');
 const targetFile = args.targetFile;
 const targetDir = args.targetDir;
 const options = {
@@ -249,6 +258,7 @@ const options = {
   esVersion,
   showError,
   showDependencyTree,
+  checkPeerDenpendency,
   compatible: new Set(),
   uncompatible: new Set(),
   nonJs : new Set(),

@@ -17,6 +17,7 @@ check-es-version --es-version=<esVersion> \
   --require-resolve-path=<requireResolvePath> \
   --show-dependency-tree=<showDependencyTree> \
   --show-error=<showError> \
+  --check-peer-dependency=<checkPeerDependency> \
   [--target-file=<targetFile>] \
   [--target-dir=<targetDir>]
 ```
@@ -37,6 +38,8 @@ has a very deep dependency tree, display the dependency tree may cause an
 unreadable output.
 - `--show-error=<showError>` or `-s <showError>`: Whether to display the
 detailed parsing errors of each uncompatible packages. Default value is `false`.
+- `--check-peer-dependency=<checkPeerDependency>` or `-c <checkPeerDependency>`:
+Whether to check the `peerDependencies` of the packages. Default value is `false`.
 - `--target-file=<targetFile>` or `-f <targetFile>`: If this argument is
 specified, the program will only check the compatibility of the specified file.
 - `--target-dir=<targetDir>` or `-d <targetDir>`: If this argument is specified,
