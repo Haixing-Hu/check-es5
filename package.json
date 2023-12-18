@@ -3,9 +3,7 @@
   "version": "1.4.2",
   "description": "A tool used to check the ECMAScript compatibility of JavaScript packages.",
   "main": "index.js",
-  "bin": {
-    "check-es-version": "index.js"
-  },
+  "bin": "index.js",
   "scripts": {
     "deploy": "npm publish --registry=https://registry.npmjs.org/"
   },
@@ -26,5 +24,6 @@
   "dependencies": {
     "acorn": "^8.8.0",
     "yargs": "^17.5.1"
-  }
+  },
+  "packageManager": "yarn@4.0.2"
 }
