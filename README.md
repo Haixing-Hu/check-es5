@@ -37,7 +37,7 @@ Whether to display the dependency tree. Default value is `false`. If the project
 has a very deep dependency tree, display the dependency tree may cause an
 unreadable output.
 - `--show-error=<showError>` or `-s <showError>`: Whether to display the
-detailed parsing errors of each uncompatible packages. Default value is `false`.
+detailed parsing errors of each incompatible packages. Default value is `false`.
 - `--check-peer-dependency=<checkPeerDependency>` or `-c <checkPeerDependency>`:
 Whether to check the `peerDependencies` of the packages. Default value is `false`.
 - `--target-file=<targetFile>` or `-f <targetFile>`: If this argument is
@@ -80,7 +80,7 @@ following command to your `package.json`:
 ```
 
 The first command `yarn es5` will check the compatibility of all compilied
-JavaScript files of your App. If you find some JS file is uncompatible, you can
+JavaScript files of your App. If you find some JS file is incompatible, you can
 execute the second command `yarn es5:dep` to check the compatibility of all
-dependencies of your App. If you find some dependency is uncompatible to ES5,
+dependencies of your App. If you find some dependency is incompatible to ES5,
 you can add it to the `build.transpileDependencies` option of `quasar.conf.js`.

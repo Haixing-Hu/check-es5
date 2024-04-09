@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 ////////////////////////////////////////////////////////////////////////////////
 //
 //    Copyright (c) 2022 - 2023.
@@ -6,8 +7,6 @@
 //    All rights reserved.
 //
 ////////////////////////////////////////////////////////////////////////////////
-
-#!/usr/bin/env node
 
 /*******************************************************************************
  *
@@ -32,26 +31,26 @@ const JAVASCRIPT_FILE_EXTENSIONS = ['.js', '.cjs'];
 
 function outputCompatible(packageName, options, indent) {
   const indentSpace = INDENT_SPACE.repeat(indent);
-  console.log(`${indentSpace}${VALID_SYMBOL} ${packageName} is ES${options.esVersion} compatible.`);
+  console.info(`${indentSpace}${VALID_SYMBOL} ${packageName} is ES${options.esVersion} compatible.`);
 }
 
-function outputUncompatible(packageName, options, indent, error) {
+function outputIncompatible(packageName, options, indent, error) {
   const indentSpace = INDENT_SPACE.repeat(indent);
   if (options.showError && error) {
-    console.log(`${indentSpace}${INVALID_SYMBOL} ${packageName} is NOT ES${options.esVersion} compatible:`, error);
+    console.error(`${indentSpace}${INVALID_SYMBOL} ${packageName} is NOT ES${options.esVersion} compatible:`, error.message);
   } else {
-    console.log(`${indentSpace}${INVALID_SYMBOL} ${packageName} is NOT ES${options.esVersion} compatible.`);
+    console.error(`${indentSpace}${INVALID_SYMBOL} ${packageName} is NOT ES${options.esVersion} compatible.`);
   }
 }
 
 function outputCannotOpen(packageName, indent) {
   const indentSpace = INDENT_SPACE.repeat(indent);
-  console.log(`${indentSpace}${QUESTION_SYMBOL} ${packageName} has no main script file. `);
+  console.error(`${indentSpace}${QUESTION_SYMBOL} ${packageName} has no main script file. `);
 }
 
 function outputNonJs(packageName, indent) {
   const indentSpace = INDENT_SPACE.repeat(indent);
-  console.log(`${indentSpace}${VALID_SYMBOL} ${packageName} is not a JavaScript library, ignore it.`);
+  console.info(`${indentSpace}${VALID_SYMBOL} ${packageName} is not a JavaScript library, ignore it.`);
 }
 
 function shouldIgnore(path) {
@@ -103,10 +102,10 @@ function checkScript(packageName, scriptPath, options, indent) {
     return true;
   } catch (error) {
     if (options.showDependencyTree) {
-      outputUncompatible(packageName, options, indent, error);
+      outputIncompatible(packageName, options, indent, error);
     }
-    options.uncompatible.add(packageName);
-    options.uncompatibleErrors.set(packageName, error);
+    options.incompatible.add(packageName);
+    options.incompatibleErrors.set(packageName, error);
     return false;
   }
 }
@@ -123,20 +122,20 @@ function checkDependencies(packageName, packagePath, options, indent) {
     return false;
   }
   let dependencies = Object.keys(packageInfo.dependencies || {});
-  if (options.checkPeerDenpendency) {
+  if (options.checkPeerDependency) {
     dependencies = dependencies.concat(Object.keys(packageInfo.peerDependencies || {}));
   }
   dependencies = dependencies.sort();
-  // console.log('Checking the following list of dependencies: ', dependencies);
+  // console.info('Checking the following list of dependencies: ', dependencies);
   dependencies.forEach((dep) => {
     if (options.compatible.has(dep)) {
       if (options.showDependencyTree) {
         outputCompatible(dep, options, indent);
       }
       return true;
-    } else if (options.uncompatible.has(dep)) {
+    } else if (options.incompatible.has(dep)) {
       if (options.showDependencyTree) {
-        outputUncompatible(dep, options, indent);
+        outputIncompatible(dep, options, indent);
       }
       return false;
     } else if (options.canNotOpen.has(dep)) {
@@ -165,39 +164,39 @@ function checkDependencies(packageName, packagePath, options, indent) {
 }
 
 function checkEsCompatible(packageName, packagePath, options, indent) {
-  const package = require(resolve(packagePath, 'package.json'));
+  const pkg = require(resolve(packagePath, 'package.json'));
   if (packageName === '.') {
-    packageName = package.name;
+    packageName = pkg.name;
   }
-  const mainScriptPath = (package.main ? resolve(packagePath, package.main) : null);
+  const mainScriptPath = (pkg.main ? resolve(packagePath, pkg.main) : null);
   checkScript(packageName, mainScriptPath, options , indent);
   checkDependencies(packageName, packagePath, options, indent + 1);
-  console.log('All compatible packages are: ');
+  console.info('All compatible packages are: ');
   options.compatible.forEach((pkg) => {
     outputCompatible(pkg, options, 1);
   });
   if (options.nonJs.size > 0) {
-    console.log('All non-JavaScript packages are: ');
+    console.info('All non-JavaScript packages are: ');
     options.nonJs.forEach((pkg) => {
       outputNonJs(pkg, 1);
     });
   }
-  if (options.uncompatible.size === 0) {
-    console.log('No uncompatible packages.');
+  if (options.incompatible.size === 0) {
+    console.info('No incompatible packages.');
   } else {
-    console.log('All uncompatible packages are: ');
-    options.uncompatible.forEach((pkg) => {
-      const error = options.uncompatibleErrors.get(pkg);
-      outputUncompatible(pkg, options, 1, error);
+    console.info('All incompatible packages are: ');
+    options.incompatible.forEach((pkg) => {
+      const error = options.incompatibleErrors.get(pkg);
+      outputIncompatible(pkg, options, 1, error);
     });
   }
   if (options.canNotOpen.size > 0) {
-    console.log('The following packages have no main script or cannot be read:')
+    console.info('The following packages have no main script or cannot be read:')
     options.canNotOpen.forEach((pkg) => {
       outputCannotOpen(pkg, 1);
     });
   }
-  return (options.uncompatible.size === 0);
+  return (options.incompatible.size === 0);
 }
 
 const args = yargs(hideBin(process.argv))
@@ -215,7 +214,7 @@ const args = yargs(hideBin(process.argv))
   })
   .option('require-resolve-path', {
     alias: 'r',
-    description: 'The resolve path for depdendent packages.',
+    description: 'The resolve path for dependent packages.',
     type: String,
     default: '.',
   })
@@ -259,7 +258,7 @@ const packageName = args.packageName;
 const packagePath = (packageName === '.' ? '.' : resolve(requireResolvePath, `node_modules/${packageName}`));
 const showDependencyTree = (args.showDependencyTree === 'true');
 const showError = (args.showError === 'true');
-const checkPeerDenpendency = (args.checkPeerDenpendency === 'true');
+const checkPeerDependency = (args.checkPeerDependency === 'true');
 const targetFile = args.targetFile;
 const targetDir = args.targetDir;
 const options = {
@@ -267,21 +266,21 @@ const options = {
   esVersion,
   showError,
   showDependencyTree,
-  checkPeerDenpendency,
+  checkPeerDependency: checkPeerDependency,
   compatible: new Set(),
-  uncompatible: new Set(),
+  incompatible: new Set(),
   nonJs : new Set(),
   canNotOpen: new Set(),
-  uncompatibleErrors: new Map(),
+  incompatibleErrors: new Map(),
 };
 
-// console.log(args);
+// console.info(args);
 
 if (targetFile) {
   options.showDependencyTree = true;
   checkScript(targetFile, targetFile, options, 0);
 } else if (targetDir) {
-  console.log(`Checking all JavaScript files in ${targetDir} ...`);
+  console.info(`Checking all JavaScript files in ${targetDir} ...`);
   options.showDependencyTree = true;
   fs.readdir(targetDir, (error, files) => {
     if (error) {

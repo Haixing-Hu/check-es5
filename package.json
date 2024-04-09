@@ -1,11 +1,11 @@
 {
   "name": "check-es-version",
-  "version": "1.4.2",
+  "version": "1.5.0",
   "description": "A tool used to check the ECMAScript compatibility of JavaScript packages.",
   "main": "index.js",
   "bin": "index.js",
   "scripts": {
-    "deploy": "npm publish --registry=https://registry.npmjs.org/"
+    "deploy": "npm publish --registry='https://registry.npmjs.com/' --access public"
   },
   "repository": {
     "type": "git",
